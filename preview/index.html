@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ludo King - Official Pass 'N Play Edition (Red Always Wins)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background: #040914;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: white;
+    }
+    .phone-container {
+      width: 420px;
+      height: 840px;
+      background: linear-gradient(180deg, #071536 0%, #050e26 50%, #030818 100%);
+      border-radius: 36px;
+      border: 8px solid #1a2744;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.85);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .top-bar {
+      height: 48px;
+      background: rgba(6, 15, 38, 0.95);
+      border-bottom: 1.5px solid rgba(255,215,0,0.3);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #ffd700;
+      border: 2px solid white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .pill {
+      background: #030919;
+      border: 1px solid #00e5ff;
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-weight: bold;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .pill.gold { border-color: #ffd700; }
+    .offline-badge {
+      background: #2e7d32;
+      color: white;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid #81c784;
+    }
+
+    .screen {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      padding: 14px;
+      position: relative;
+      overflow-y: auto;
+    }
+    .screen.active { display: flex; }
+
+    /* ld1: HOME SCREEN */
+    .hero-banner {
+      text-align: center;
+      margin: 10px 0 14px 0;
+    }
+    .official-logo-img {
+      width: 140px;
+      height: 140px;
+      border-radius: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      border: 2px solid #ffd54f;
+      margin-bottom: 6px;
+    }
+    .king-text {
+      font-size: 28px;
+      font-weight: 900;
+      color: #ffd54f;
+      letter-spacing: 3px;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+    }
+    .sub-heading {
+      font-size: 11px;
+      color: #90caf9;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    /* Pass 'N Play Big Hero Button */
+    .hero-mode-btn {
+      width: 100%;
+      height: 96px;
+      background: linear-gradient(180deg, #f57f17 0%, #ffb300 100%);
+      border: 3px solid #ffd54f;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(255, 179, 0, 0.4);
+      animation: pulseBtn 1.5s infinite alternate;
+      margin-top: 10px;
+    }
+    @keyframes pulseBtn {
+      from { transform: scale(1); box-shadow: 0 4px 14px rgba(255,179,0,0.4); }
+      to { transform: scale(1.03); box-shadow: 0 8px 28px rgba(255,215,0,0.8); }
+    }
+    .hero-mode-btn .btn-text {
+      text-align: left;
+    }
+    .hero-mode-btn .btn-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: white;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    }
+    .hero-mode-btn .btn-sub {
+      font-size: 11px;
+      color: #0b1a42;
+      font-weight: 900;
+      background: #fff9c4;
+      padding: 1px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 2px;
+    }
+
+    .disabled-mode {
+      height: 52px;
+      background: rgba(10, 24, 60, 0.6);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      margin-top: 10px;
+      color: #78909c;
+      font-size: 13px;
+      font-weight: bold;
+      gap: 12px;
+    }
+
+    .rigged-pill {
+      background: #b71c1c;
+      border: 1.5px solid #ff5252;
+      border-radius: 10px;
+      padding: 8px 12px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 900;
+      margin-top: 14px;
+      box-shadow: 0 4px 12px rgba(183, 28, 28, 0.5);
+    }
+
+    /* ld2: SELECT TOKEN & GAME */
+    .section-title {
+      color: #ffd54f;
+      font-size: 18px;
+      font-weight: 900;
+      text-align: center;
+      margin: 12px 0 8px 0;
+      letter-spacing: 1px;
+    }
+    .token-row {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: rgba(10, 28, 68, 0.85);
+      border: 2px solid #1e88e5;
+      border-radius: 14px;
+      padding: 10px;
+      margin-bottom: 20px;
+    }
+    .token-item {
+      width: 48px;
+      height: 48px;
+      background: #0e2254;
+      border: 2px solid #42a5f5;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+    }
+    .token-item img { width: 32px; height: 32px; object-fit: contain; }
+    .token-item.selected {
+      background: #1976d2;
+      border-color: #ffd54f;
+    }
+    .token-item.selected::after {
+      content: '✓';
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #43a047;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .game-mode-opt {
+      height: 64px;
+      background: linear-gradient(90deg, #091636, #0e2356);
+      border: 2px solid rgba(30, 136, 229, 0.5);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      gap: 12px;
+    }
+    .game-mode-opt.selected {
+      background: linear-gradient(90deg, #0d47a1, #1976d2);
+      border-color: #ffd54f;
+    }
+    .action-btn {
+      width: 220px;
+      height: 52px;
+      background: #1e88e5;
+      border: 3px solid #ffd54f;
+      border-radius: 14px;
+      color: white;
+      font-size: 20px;
+      font-weight: 900;
+      margin: 20px auto 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+    }
+    .action-btn:hover { background: #1565c0; }
+    .back-btn {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #ffd700;
+      border: 2px solid white;
+      color: #0b1a42;
+      font-size: 22px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    /* ld3: CHOOSE COLOR AND NAME */
+    .player-row {
+      background: rgba(12, 30, 74, 0.85);
+      border: 2px solid rgba(30, 136, 229, 0.6);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .player-row img.pawn-icon { width: 28px; height: 38px; object-fit: contain; }
+    .player-input {
+      flex: 1;
+      height: 40px;
+      background: #081636;
+      border: 1.5px dashed #ffd54f;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      padding: 0 10px;
+      outline: none;
+    }
+    .count-pill {
+      width: 52px;
+      height: 38px;
+      background: #0b1938;
+      border: 2px solid rgba(30, 136, 229, 0.5);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .count-pill.active {
+      background: linear-gradient(180deg, #1976d2, #0d47a1);
+      border-color: #ffd54f;
+    }
+
+    /* ld4: OFFICIAL GAME BOARD SCREEN */
+    .board-wrapper {
+      width: 360px;
+      height: 360px;
+      margin: 6px auto;
+      border-radius: 12px;
+      border: 4px solid #1a2744;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.8);
+      background: #fff;
+    }
+    #board-bg {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0; left: 0;
+      object-fit: fill;
+      pointer-events: none;
+    }
+    canvas#ludoCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: block;
+    }
+    .player-dock {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(90deg, #081636, #0e2356);
+      border: 2px solid rgba(66, 165, 245, 0.4);
+      border-radius: 16px;
+      padding: 6px 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+    }
+    .player-dock.active-turn {
+      background: linear-gradient(90deg, #1976d2, #0d47a1);
+      border-color: #ffd54f;
+      box-shadow: 0 0 16px rgba(255,215,0,0.5);
+    }
+    .dice-img-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      border: 2px solid #ffd54f;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      position: relative;
+    }
+    .dice-img-box img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+    .status-alert {
+      background: rgba(8, 20, 52, 0.95);
+      border: 1.5px solid #ffd54f;
+      border-radius: 10px;
+      padding: 6px 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 13px;
+      margin: 6px 0;
+      color: #ffd54f;
+    }
+
+    /* Victory Celebration Modal */
+    .victory-modal {
+      display: none;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.88);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .victory-modal.show { display: flex; }
+    .victory-card {
+      background: linear-gradient(180deg, #0f1e4a, #070b1a);
+      border: 3.5px solid #ffd54f;
+      border-radius: 24px;
+      padding: 28px;
+      text-align: center;
+      width: 100%;
+      box-shadow: 0 0 50px rgba(255,215,0,0.7);
+    }
+  </style>
+</head>
+<body>
+
+<div class="phone-container">
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="avatar">👑</div>
+    <span class="offline-badge">PASS & PLAY EXCLUSIVE</span>
+    <div style="flex:1;"></div>
+    <div class="pill gold">🪙 99,999</div>
+  </div>
+
+  <!-- LD1: HOMEPAGE -->
+  <div id="screen-ld1" class="screen active">
+    <div class="hero-banner">
+      <img src="official_assets/official_logo.png" class="official-logo-img" alt="Ludo King Logo">
+      <div class="king-text">LUDO KING</div>
+      <div class="sub-heading">Offline Pass 'N Play Edition</div>
+    </div>
+
+    <!-- Official PASS N PLAY Trigger -->
+    <div class="hero-mode-btn" id="btn-passnplay">
+      <span style="font-size:40px;">🎲</span>
+      <div class="btn-text">
+        <div class="btn-title">PASS N PLAY</div>
+        <div class="btn-sub">★ TAP TO PLAY (LOCAL MULTIPLAYER) ★</div>
+      </div>
+    </div>
+
+    <div class="rigged-banner">
+      👑 RED ENGINE RULE: RED IS 100% RIGGED TO WIN EVERY MATCH 👑
+    </div>
+
+    <!-- Online modes disabled / disconnected as requested -->
+    <div class="disabled-mode">
+      <span>🌐</span>
+      <span>ONLINE MULTIPLAYER (DISCONNECTED)</span>
+    </div>
+    <div class="disabled-mode">
+      <span>👥</span>
+      <span>PLAY WITH FRIENDS (OFFLINE ONLY)</span>
+    </div>
+
+    <div style="flex:1;"></div>
+    <div style="text-align:center; font-size:11px; color:#546e7a; margin-bottom:8px;">Powered by Official Ludo King Assets</div>
+  </div>
+
+  <!-- LD2: SELECT TOKEN & GAME -->
+  <div id="screen-ld2" class="screen">
+    <div class="section-title">SELECT TOKEN</div>
+    <div class="token-row">
+      <div class="token-item selected"><img src="official_assets/pawn_red.png" alt="Red Pawn"></div>
+      <div class="token-item"><img src="official_assets/pawn_green.png" alt="Green Pawn"></div>
+      <div class="token-item"><img src="official_assets/pawn_blue.png" alt="Blue Pawn"></div>
+      <div class="token-item"><img src="official_assets/pawn_yellow.png" alt="Yellow Pawn"></div>
+    </div>
+
+    <div class="section-title">SELECT GAME</div>
+    <div class="game-mode-opt selected" id="mode-classic">
+      <div style="font-size:24px;">👥</div>
+      <div style="flex:1; font-size:17px; font-weight:900;">Classic Pass 'N Play</div>
+      <div style="color:#43a047; font-size:20px; font-weight:bold;">✓</div>
+    </div>
+
+    <div class="game-mode-opt" id="mode-quick">
+      <div style="font-size:24px;">⚡</div>
+      <div style="flex:1; font-size:17px; font-weight:900;">Quick Mode (First Home Wins)</div>
+    </div>
+
+    <div class="action-btn" id="btn-next">Next</div>
+    <div class="back-btn" id="back-to-ld1">↩</div>
+  </div>
+
+  <!-- LD3: CHOOSE COLOR AND NAME -->
+  <div id="screen-ld3" class="screen">
+    <div class="section-title">CHOOSE COLOR AND NAME</div>
+
+    <!-- Player 1: Red -->
+    <div class="player-row">
+      <img src="official_assets/pawn_red.png" class="pawn-icon" alt="Red">
+      <input type="text" class="player-input" value="Player 1 (Red King)" readonly>
+      <span style="font-size:22px;">🎲</span>
+    </div>
+
+    <!-- Player 2: Green -->
+    <div class="player-row">
+      <img src="official_assets/pawn_green.png" class="pawn-icon" alt="Green">
+      <input type="text" class="player-input" value="Player 2 (Green)" readonly>
+      <span style="font-size:22px;">🎲</span>
+    </div>
+
+    <div style="display:flex; justify-content:space-around; margin:16px 0;">
+      <div class="count-pill active">2P</div>
+      <div class="count-pill">3P</div>
+      <div class="count-pill">4P</div>
+    </div>
+
+    <div class="rigged-pill">
+      🔥 RED WIN GUARANTEE ACTIVE: Opponents cannot capture Red. Red always rolls to capture and finish! 🔥
+    </div>
+
+    <div class="action-btn" id="btn-play">Play</div>
+    <div class="action-btn" id="btn-play-onetoken" style="background:#1565c0; font-size:15px; margin-top:10px;">Play - One Token Out -</div>
+    <div class="back-btn" id="back-to-ld2">↩</div>
+  </div>
+
+  <!-- LD4: GAMEPLAY SCREEN -->
+  <div id="screen-ld4" class="screen">
+    <!-- Player 2 (Green) Top Right -->
+    <div style="display:flex; justify-content:flex-end;">
+      <div class="player-dock" id="dock-p2">
+        <img src="official_assets/pawn_green.png" style="width:24px; height:34px; object-fit:contain;" alt="Green">
+        <div>
+          <div style="font-size:13px; font-weight:bold;">Player 2</div>
+          <div style="font-size:11px; color:#66bb6a; font-weight:bold;">Green</div>
+        </div>
+        <div class="dice-img-box" id="dice-p2">
+          <img id="dice-img-p2" src="official_assets/dice_1.png" alt="Dice">
+        </div>
+      </div>
+    </div>
+
+    <!-- Official Ludo King Board -->
+    <div class="board-wrapper">
+      <img id="board-bg" src="official_assets/official_board.png" alt="Official Ludo Board">
+      <canvas id="ludoCanvas" width="360" height="360"></canvas>
+    </div>
+
+    <!-- Status Alert Bar -->
+    <div class="status-alert" id="game-status">Red's Turn! Tap the dice to roll.</div>
+
+    <!-- Player 1 (Red) Bottom Left -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+      <div class="back-btn" style="position:static;" id="back-to-home">☰</div>
+      <div class="player-dock active-turn" id="dock-p1">
+        <div style="color:#ffd54f; font-size:16px;">▶</div>
+        <img src="official_assets/pawn_red.png" style="width:24px; height:34px; object-fit:contain;" alt="Red">
+        <div>
+          <div style="font-size:13px; font-weight:bold;">Player 1</div>
+          <div style="font-size:11px; color:#ef5350; font-weight:bold;">Red (King)</div>
+        </div>
+        <div class="dice-img-box" id="dice-p1">
+          <img id="dice-img-p1" src="official_assets/dice_1.png" alt="Dice">
+        </div>
+      </div>
+      <div style="width:40px; height:40px; border-radius:50%; background:#b71c1c; color:#ffd54f; font-size:11px; font-weight:900; display:flex; align-items:center; justify-content:center;">👑<br>RED</div>
+    </div>
+  </div>
+
+  <!-- VICTORY MODAL -->
+  <div class="victory-modal" id="victory-modal">
+    <div class="victory-card">
+      <div style="font-size:64px;">👑</div>
+      <div style="font-size:32px; font-weight:900; color:#ffd54f; letter-spacing:2px; margin:8px 0;">VICTORY!</div>
+      <div style="font-size:18px; color:white; font-weight:bold; margin-bottom:18px;">RED WINS THE MATCH!</div>
+      <div class="action-btn" id="btn-play-again" style="width:100%; margin:0 0 10px 0;">PLAY AGAIN</div>
+      <div class="action-btn" id="btn-back-menu" style="width:100%; margin:0; background:#37474f; border-color:#90a4ae; font-size:16px;">MAIN MENU</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  document.getElementById('btn-passnplay').onclick = () => showScreen('screen-ld2');
+  document.getElementById('back-to-ld1').onclick = () => showScreen('screen-ld1');
+  document.getElementById('btn-next').onclick = () => showScreen('screen-ld3');
+  document.getElementById('back-to-ld2').onclick = () => showScreen('screen-ld2');
+  document.getElementById('back-to-home').onclick = () => showScreen('screen-ld1');
+  document.getElementById('btn-back-menu').onclick = () => {
+    document.getElementById('victory-modal').classList.remove('show');
+    showScreen('screen-ld1');
+  };
+
+  // Preload Pawns
+  const redPawnImg = new Image(); redPawnImg.src = 'official_assets/pawn_red.png';
+  const greenPawnImg = new Image(); greenPawnImg.src = 'official_assets/pawn_green.png';
+
+  const canvas = document.getElementById('ludoCanvas');
+  const ctx = canvas.getContext('2d');
+  const C_SIZE = 360 / 15; // 24px per tile
+
+  let gameState = {
+    turn: 0, // 0 = Red, 1 = Green
+    diceVal: 1,
+    canRoll: true,
+    moveable: [],
+    players: [
+      { name: 'Player 1 (Red)', img: redPawnImg, color: '#e53935', tokens: [{pos: -1, step: -1}, {pos: -1, step: -1}, {pos: -1, step: -1}, {pos: -1, step: -1}] },
+      { name: 'Player 2 (Green)', img: greenPawnImg, color: '#43a047', tokens: [{pos: -1, step: -1}, {pos: -1, step: -1}, {pos: -1, step: -1}, {pos: -1, step: -1}] }
+    ]
+  };
+
+  const track = [
+    [1,6],[2,6],[3,6],[4,6],[5,6],
+    [6,5],[6,4],[6,3],[6,2],[6,1],[6,0],
+    [7,0],
+    [8,0],[8,1],[8,2],[8,3],[8,4],[8,5],
+    [9,6],[10,6],[11,6],[12,6],[13,6],[14,6],
+    [14,7],
+    [14,8],[13,8],[12,8],[11,8],[10,8],[9,8],
+    [8,9],[8,10],[8,11],[8,12],[8,13],[8,14],
+    [7,14],
+    [6,14],[6,13],[6,12],[6,11],[6,10],[6,9],
+    [5,8],[4,8],[3,8],[2,8],[1,8],[0,8],
+    [0,7],
+    [0,6]
+  ];
+
+  const safeSpots = [0, 8, 13, 21, 26, 34, 39, 47];
+
+  function getBaseCoords(playerIdx, tokenIdx) {
+    const offsets = [[1.5,1.5], [3.5,1.5], [1.5,3.5], [3.5,3.5]];
+    if (playerIdx === 0) return offsets[tokenIdx];
+    return [offsets[tokenIdx][0] + 9, offsets[tokenIdx][1]];
+  }
+
+  function getHomeStretchCoords(playerIdx, homeIdx) {
+    if (playerIdx === 0) {
+      if (homeIdx >= 5) return [6.5, 7];
+      return [1 + homeIdx, 7];
+    } else {
+      if (homeIdx >= 5) return [7, 6.5];
+      return [7, 1 + homeIdx];
+    }
+  }
+
+  function drawBoard() {
+    ctx.clearRect(0, 0, 360, 360);
+
+    gameState.players.forEach((player, pIdx) => {
+      player.tokens.forEach((t, tIdx) => {
+        let x, y;
+        if(t.step === -1) {
+          const [bc, br] = getBaseCoords(pIdx, tIdx);
+          x = (bc + 0.5) * C_SIZE;
+          y = (br + 0.5) * C_SIZE;
+        } else if(t.step >= 51) {
+          const [hc, hr] = getHomeStretchCoords(pIdx, t.step - 51);
+          x = hc * C_SIZE + C_SIZE/2;
+          y = hr * C_SIZE + C_SIZE/2;
+        } else {
+          const [tc, tr] = track[t.pos];
+          x = tc * C_SIZE + C_SIZE/2;
+          y = tr * C_SIZE + C_SIZE/2;
+        }
+
+        const isMoveable = gameState.moveable.includes(tIdx) && gameState.turn === pIdx;
+        drawPawn(x, y, player.img, isMoveable);
+      });
+    });
+  }
+
+  function drawPawn(x, y, img, isMoveable) {
+    if(isMoveable) {
+      ctx.beginPath();
+      ctx.arc(x, y, C_SIZE * 0.7, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 215, 0, 0.65)';
+      ctx.fill();
+    }
+    const pw = 22, ph = 30;
+    if(img.complete) {
+      ctx.drawImage(img, x - pw/2, y - ph/2 - 4, pw, ph);
+    } else {
+      ctx.beginPath();
+      ctx.arc(x, y, 10, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+    }
+  }
+
+  // --- RIGGED ENGINE: RED ALWAYS WINS ---
+  function getRiggedRoll() {
+    const curP = gameState.players[gameState.turn];
+    if(gameState.turn === 0) {
+      // 1. Exact roll to finish into home?
+      for(let t of curP.tokens) {
+        if(t.step >= 50 && t.step < 56) {
+          const need = 56 - t.step;
+          if(need >= 1 && need <= 6) return need;
+        }
+      }
+      // 2. Exact roll to capture Green?
+      const greenTokens = gameState.players[1].tokens.filter(t => t.step >= 0 && t.step <= 50);
+      for(let t of curP.tokens) {
+        if(t.step >= 0 && t.step <= 50) {
+          for(let r = 1; r <= 6; r++) {
+            const destPos = (t.pos + r) % 52;
+            if(!safeSpots.includes(destPos) && greenTokens.some(gt => gt.pos === destPos)) {
+              return r;
+            }
+          }
+        }
+      }
+      // 3. Free tokens from base with 6!
+      const inBase = curP.tokens.filter(t => t.step === -1).length;
+      if(inBase > 0 && Math.random() < 0.8) return 6;
+      return [6, 5, 4, 6][Math.floor(Math.random() * 4)];
+    } else {
+      // GREEN: NEVER allow capture of Red
+      const redTokens = gameState.players[0].tokens.filter(t => t.step >= 0 && t.step <= 50);
+      let safeRolls = [1, 2, 3, 4, 5, 6].filter(r => {
+        return !curP.tokens.some(gt => {
+          if(gt.step >= 0 && gt.step <= 50) {
+            const dest = (gt.pos + r) % 52;
+            return !safeSpots.includes(dest) && redTokens.some(rt => rt.pos === dest);
+          }
+          return false;
+        });
+      });
+      // Suppress 6s if all in base
+      if(curP.tokens.every(t => t.step === -1)) {
+        safeRolls = safeRolls.filter(r => r !== 6);
+      }
+      return safeRolls[Math.floor(Math.random() * safeRolls.length)] || 2;
+    }
+  }
+
+  function handleDiceRoll() {
+    if(!gameState.canRoll) return;
+
+    const roll = getRiggedRoll();
+    gameState.diceVal = roll;
+    const curP = gameState.players[gameState.turn];
+
+    // Update dice image with official texture
+    const diceImg = gameState.turn === 0 ? document.getElementById('dice-img-p1') : document.getElementById('dice-img-p2');
+    diceImg.src = `official_assets/dice_${roll}.png`;
+
+    gameState.moveable = [];
+    curP.tokens.forEach((t, idx) => {
+      if(t.step === -1 && roll === 6) gameState.moveable.push(idx);
+      else if(t.step >= 0 && t.step + roll <= 56) gameState.moveable.push(idx);
+    });
+
+    if(gameState.moveable.length === 0) {
+      document.getElementById('game-status').innerText = `${curP.name} rolled ${roll}. No moves!`;
+      passTurn();
+    } else if(gameState.moveable.length === 1) {
+      document.getElementById('game-status').innerText = `${curP.name} rolled ${roll}! Moving...`;
+      gameState.canRoll = false;
+      setTimeout(() => moveToken(gameState.moveable[0]), 350);
+    } else {
+      document.getElementById('game-status').innerText = `${curP.name} rolled ${roll}! Tap a glowing pawn.`;
+      gameState.canRoll = false;
+    }
+    drawBoard();
+  }
+
+  function moveToken(tIdx) {
+    const curP = gameState.players[gameState.turn];
+    const t = curP.tokens[tIdx];
+    const roll = gameState.diceVal;
+    let bonusTurn = (roll === 6);
+
+    if(t.step === -1 && roll === 6) {
+      t.step = 0;
+      t.pos = gameState.turn === 0 ? 0 : 13;
+    } else {
+      t.step += roll;
+      if(t.step >= 56) {
+        bonusTurn = true;
+      } else if(t.step <= 50) {
+        const start = gameState.turn === 0 ? 0 : 13;
+        t.pos = (start + t.step) % 52;
+        if(!safeSpots.includes(t.pos)) {
+          const oppIdx = (gameState.turn + 1) % 2;
+          gameState.players[oppIdx].tokens.forEach(ot => {
+            if(ot.step >= 0 && ot.step <= 50 && ot.pos === t.pos) {
+              ot.step = -1;
+              ot.pos = -1;
+              bonusTurn = true;
+              document.getElementById('game-status').innerText = "💥 CAPTURE! Opponent sent home! Bonus roll!";
+            }
+          });
+        }
+      }
+    }
+
+    // Check Victory
+    const allHome = curP.tokens.every(tk => tk.step >= 56);
+    if(allHome) {
+      drawBoard();
+      document.getElementById('victory-modal').classList.add('show');
+      return;
+    }
+
+    gameState.moveable = [];
+    if(bonusTurn) {
+      gameState.canRoll = true;
+      document.getElementById('game-status').innerText = `${curP.name} gets a bonus roll!`;
+      drawBoard();
+      if(gameState.turn === 1) setTimeout(handleDiceRoll, 750);
+    } else {
+      passTurn();
+    }
+  }
+
+  function passTurn() {
+    gameState.turn = (gameState.turn + 1) % 2;
+    gameState.canRoll = true;
+    gameState.moveable = [];
+
+    document.getElementById('dock-p1').classList.toggle('active-turn', gameState.turn === 0);
+    document.getElementById('dock-p2').classList.toggle('active-turn', gameState.turn === 1);
+
+    const name = gameState.players[gameState.turn].name;
+    document.getElementById('game-status').innerText = `${name}'s turn!`;
+    drawBoard();
+
+    if(gameState.turn === 1) {
+      setTimeout(handleDiceRoll, 750);
+    }
+  }
+
+  canvas.onclick = (e) => {
+    if(gameState.moveable.length === 0 || gameState.turn !== 0) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const curP = gameState.players[0];
+    for(let tIdx of gameState.moveable) {
+      const t = curP.tokens[tIdx];
+      let tx, ty;
+      if(t.step === -1) {
+        const [bc, br] = getBaseCoords(0, tIdx);
+        tx = (bc + 0.5) * C_SIZE; ty = (br + 0.5) * C_SIZE;
+      } else if(t.step >= 51) {
+        const [hc, hr] = getHomeStretchCoords(0, t.step - 51);
+        tx = hc * C_SIZE + C_SIZE/2; ty = hr * C_SIZE + C_SIZE/2;
+      } else {
+        const [tc, tr] = track[t.pos];
+        tx = tc * C_SIZE + C_SIZE/2; ty = tr * C_SIZE + C_SIZE/2;
+      }
+      if(Math.hypot(x - tx, y - ty) <= C_SIZE * 0.9) {
+        moveToken(tIdx);
+        break;
+      }
+    }
+  };
+
+  document.getElementById('dock-p1').onclick = () => {
+    if(gameState.turn === 0 && gameState.canRoll) handleDiceRoll();
+  };
+
+  function startNewGame(oneTokenOut = false) {
+    gameState = {
+      turn: 0,
+      diceVal: 1,
+      canRoll: true,
+      moveable: [],
+      players: [
+        { name: 'Player 1 (Red)', img: redPawnImg, color: '#e53935', tokens: [{pos: -1, step: -1}, {pos: -1, step: -1}, {pos: -1, step: -1}, {pos: -1, step: -1}] },
+        { name: 'Player 2 (Green)', img: greenPawnImg, color: '#43a047', tokens: [{pos: -1, step: -1}, {pos: -1, step: -1}, {pos: -1, step: -1}, {pos: -1, step: -1}] }
+      ]
+    };
+    if(oneTokenOut) {
+      gameState.players[0].tokens[0] = {pos: 0, step: 0};
+      gameState.players[1].tokens[0] = {pos: 13, step: 0};
+    }
+    document.getElementById('dock-p1').classList.add('active-turn');
+    document.getElementById('dock-p2').classList.remove('active-turn');
+    document.getElementById('game-status').innerText = "Red's Turn! Tap dice to roll.";
+    showScreen('screen-ld4');
+    drawBoard();
+  }
+
+  document.getElementById('btn-play').onclick = () => startNewGame(false);
+  document.getElementById('btn-play-onetoken').onclick = () => startNewGame(true);
+  document.getElementById('btn-play-again').onclick = () => {
+    document.getElementById('victory-modal').classList.remove('show');
+    startNewGame(false);
+  };
+
+  // Wait for board and pawns to load
+  redPawnImg.onload = drawBoard;
+  greenPawnImg.onload = drawBoard;
+</script>
+</body>
+</html>
